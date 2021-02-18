@@ -1,2 +1,2 @@
 # fullstack-open
-Fullstack Open exercises
+[Fullstack Open](https://fullstackopen.com/en/) exercises.
