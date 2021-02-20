@@ -34,22 +34,19 @@ const AnecdoteOfTheDay = ({ anecdotes, votes, setVotes }) => {
 }
 
 const AnecdoteMostVotes = ({ anecdotes, votes }) => {
-  const getMostVoted = () => {
-    let maxVotes = 0
-    let maxIndex = 0 
-    for (let i = 0; i < votes.length; i++) {
-      if (votes[i] > maxVotes) {
-        maxVotes = votes[i]
-        maxIndex = i
-      }
+  let mostVoted = 0
+  let mostVotes = 0
+  for (let i = 0; i < votes.length; i++) {
+    if (votes[i] > mostVotes) {
+      mostVotes = votes[i]
+      mostVoted = i
     }
-    return maxIndex
   }
 
   return (
     <>
       <h1>Anecdote with most votes</h1>
-      <Anecdote text={ anecdotes[getMostVoted()] } votes={ votes[getMostVoted()] } />
+      <Anecdote text={ anecdotes[mostVoted] } votes={ mostVotes } />
     </>
   )
 }
