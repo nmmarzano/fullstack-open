@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 
 const Header = (props) => {
@@ -38,6 +38,19 @@ const Total = (props) => {
   )
 }
 
+const TimeFooter = (props) => {
+  const [ date, setDate ] = useState((new Date()).toTimeString());
+
+  setTimeout(
+    () => setDate((new Date()).toTimeString()),
+    1000
+  )
+
+  return (
+    <footer>{ date }</footer>
+  )
+}
+
 const App = () => {
   const course = {
     name: 'Half Stack application development',
@@ -58,11 +71,14 @@ const App = () => {
   }
 
   return (
-    <div>
-      <Header course={ course.name } />
-      <Content parts={ course.parts } />
-      <Total parts={ course.parts } />
-    </div>
+    <>
+      <div>
+        <Header course={ course.name } />
+        <Content parts={ course.parts } />
+        <Total parts={ course.parts } />
+      </div>
+      <TimeFooter />
+    </>
   )
 }
 
