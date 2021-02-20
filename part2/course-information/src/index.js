@@ -1,43 +1,21 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 
-const Header = ({ name }) => <h1>{ name }</h1>
+import Course from './components/course'
 
-const Part = ({ part, exercises }) => <p>{ part } { exercises }</p>
-
-const Content = ({ parts }) => {
-  const components = [];
-  parts.forEach(part => {
-    components.push(<Part key={ part.name } part={ part.name } exercises={ part.exercises }/>);
-  });
-
+const App = ({ courses }) => {
   return (
-    <div>{ components }</div>
+    <>
+      <h1>Web Development Curriculum</h1>
+      { courses.map(course => <Course key={ course.id } course={ course } />) }
+    </>
   )
 }
 
-const Total = ({ parts }) => {
-  const sum = parts.reduce((acc, current) => acc + current.exercises, 0);
-
-  return (
-    <b>Total of { sum } exercises</b>
-  )
-}
-
-const Course = ({ course }) => {
-  return (
-    <div>
-      <Header name={ course.name } />
-      <Content parts={ course.parts } />
-      <Total parts={ course.parts } />
-    </div>
-  )
-}
-
-const App = () => {
-  const course = {
-    id: 1,
+const courses = [
+  {
     name: 'Half Stack application development',
+    id: 1,
     parts: [
       {
         name: 'Fundamentals of React',
@@ -58,15 +36,25 @@ const App = () => {
         name: 'Redux',
         exercises: 11,
         id: 4
+      }
+    ]
+  }, 
+  {
+    name: 'Node.js',
+    id: 2,
+    parts: [
+      {
+        name: 'Routing',
+        exercises: 3,
+        id: 1
       },
+      {
+        name: 'Middlewares',
+        exercises: 7,
+        id: 2
+      }
     ]
   }
+]
 
-  return (
-    <>
-      <Course course={ course } />
-    </>
-  )
-}
-
-ReactDOM.render(<App />, document.getElementById('root'))
+ReactDOM.render(<App courses={ courses } />, document.getElementById('root'))
