@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const Filter = ({ filter, handleFilterChange }) => <>filter shown with: <input value={ filter } onChange={ handleFilterChange } /></>
 
@@ -17,13 +17,17 @@ const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, 
   </form>
 )
 
-const Person = ({ person }) => <li>{ person.name }: { person.number }</li>
+const Person = ({ person, handleDelete }) => (
+  <li>
+    { person.name }: { person.number } <button onClick={ () => { handleDelete(person) } }>delete</button>
+  </li>
+)
 
-const Persons = ({ persons, filter }) => (
+const Persons = ({ persons, filter, handleDelete }) => (
   <ul>
     { persons
       .filter(person => person.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
-      .map(person => <Person key={ person.name } person={ person } />) }
+      .map(person => <Person key={ person.name } person={ person } handleDelete={ handleDelete } />) }
   </ul>
 )
 
@@ -34,15 +38,14 @@ const App = () => {
   const [ filter, setFilter ] = useState('')
 
   useEffect(() => {
-    console.log('useEffect')
-    axios.get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('response', response)
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   }, [])
 
-  const handleSubmitNew = (event) => {
+  const handleSubmitNew = event => {
     event.preventDefault()
 
     if (newName === '' || newNumber === '') {
@@ -50,14 +53,48 @@ const App = () => {
       return
     }
 
-    if (persons.find(person => person.name === newName)) {
-      window.alert(`"${ newName }" is already added to the phonebook.`)
+    const oldPerson = persons.find(person => person.name === newName)
+    if (oldPerson) {
+      if (window.confirm(`"${ newName }" is already added to the phonebook, replace the old number with a new one?`)) {
+        handleEdit({...oldPerson, number: newNumber})
+      }
       return
     }
 
-    setPersons(persons.concat({ name: newName, number: newNumber }))
+    const newPerson = { name: newName, number: newNumber }
+
+    personService
+      .create(newPerson)
+      .then(response => {
+        setPersons(persons.concat(response))
+      })
     setNewName('')
     setNewNumber('')
+  }
+
+  const handleDelete = person => {
+    if (window.confirm(`Delete ${ person.name }?`)) {
+      personService
+      .deleteOne(person.id)
+      .then(response => {
+        setPersons(persons.filter(p => p.id !== person.id))
+      }).catch(error => {
+        window.alert(`Person ${ person.name } was not found in the database.`)
+        setPersons(persons.filter(p => p.id !== person.id))
+      })
+    }
+  }
+
+  const handleEdit = person => {
+    personService
+      .update(person.id, person)
+      .then(response => {
+        setPersons(persons.map(p => p.id === response.id ? response : p))
+      })
+      .catch(error => {
+        window.alert(`The person ${ person.name } was already deleted or otherwise not found`)
+        setPersons(persons.filter(p => p.id != person.id))
+      })
   }
 
   const handleFilterChange = (event) => {
@@ -84,7 +121,7 @@ const App = () => {
         handleNumberChange={ handleNumberChange } 
         handleSubmitNew={ handleSubmitNew } />
       <h3>Numbers</h3>
-      <Persons persons={ persons } filter={ filter } />
+      <Persons persons={ persons } filter={ filter } handleDelete={ handleDelete } />
     </div>
   )
 }
