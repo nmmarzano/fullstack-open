@@ -1,5 +1,19 @@
+import './App.css'
+
 import React, { useState, useEffect } from 'react'
 import personService from './services/persons'
+
+const Notification = ({ notification }) => {
+  if (notification === null || notification.message === null) {
+    return null
+  }
+
+  return (
+    <div className={ notification.type }>
+      {notification.message}
+    </div>
+  )
+}
 
 const Filter = ({ filter, handleFilterChange }) => <>filter shown with: <input value={ filter } onChange={ handleFilterChange } /></>
 
@@ -37,6 +51,8 @@ const App = () => {
   const [ newNumber, setNewNumber ] = useState('')
   const [ filter, setFilter ] = useState('')
 
+  const [notification, setNotification ] = useState(null)
+
   useEffect(() => {
     personService
       .getAll()
@@ -66,7 +82,16 @@ const App = () => {
     personService
       .create(newPerson)
       .then(response => {
+        setNotification({message: `The person '${ response.name }' was successfully created.`, type: 'success'})
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
         setPersons(persons.concat(response))
+      }).catch(error => {
+        setNotification({message: `The person '${ newPerson.name }' could not be created.`, type: 'error'})
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
       })
     setNewName('')
     setNewNumber('')
@@ -77,9 +102,16 @@ const App = () => {
       personService
       .deleteOne(person.id)
       .then(response => {
+        setNotification({message: `The person '${ person.name }' was successfully deleted.`, type: 'success'})
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
         setPersons(persons.filter(p => p.id !== person.id))
       }).catch(error => {
-        window.alert(`Person ${ person.name } was not found in the database.`)
+        setNotification({message: `The person '${ person.name }' was not found in the database.`, type: 'error'})
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
         setPersons(persons.filter(p => p.id !== person.id))
       })
     }
@@ -89,10 +121,17 @@ const App = () => {
     personService
       .update(person.id, person)
       .then(response => {
+        setNotification({message: `The person '${ person.name }' was successfully edited.`, type: 'success'})
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
         setPersons(persons.map(p => p.id === response.id ? response : p))
       })
       .catch(error => {
-        window.alert(`The person ${ person.name } was already deleted or otherwise not found`)
+        setNotification({message: `The person '${ person.name }' was already deleted or otherwise not found.`, type: 'error'})
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
         setPersons(persons.filter(p => p.id != person.id))
       })
   }
@@ -112,6 +151,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notification={ notification } />
       <Filter filter={ filter } handleFilterChange={ handleFilterChange } />
       <h3>Add a new one</h3>
       <PersonForm 
