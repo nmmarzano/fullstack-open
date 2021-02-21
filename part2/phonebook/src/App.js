@@ -4,19 +4,17 @@ import axios from 'axios'
 const Filter = ({ filter, handleFilterChange }) => <>filter shown with: <input value={ filter } onChange={ handleFilterChange } /></>
 
 const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, handleSubmitNew }) => (
-  <>
-    <form onSubmit={ handleSubmitNew }>
-      <div>
-        name: <input value={ newName } onChange={ handleNameChange } />
-      </div>
-      <div>
-        number: <input value={ newNumber } onChange={ handleNumberChange } />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  </>
+  <form onSubmit={ handleSubmitNew }>
+    <div>
+      name: <input value={ newName } onChange={ handleNameChange } />
+    </div>
+    <div>
+      number: <input value={ newNumber } onChange={ handleNumberChange } />
+    </div>
+    <div>
+      <button type="submit">add</button>
+    </div>
+  </form>
 )
 
 const Person = ({ person }) => <li>{ person.name }: { person.number }</li>
