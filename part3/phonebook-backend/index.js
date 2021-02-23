@@ -1,7 +1,17 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
+
+morgan.token('body', (req, res) => {
+    if (req.method === 'POST') {
+        return JSON.stringify(req.body)
+    } else {
+        return ''
+    }
+})
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 let persons = [
     {
@@ -30,20 +40,11 @@ let maxId = persons.length + 1
 
 console.log('Starting server...')
 
-const printRequest = request => {
-    console.log(request.method, `'${request.url}'`, '\n')
-    console.log('Params: ', request.params, '\n')
-    console.log('Body: ', request.body, '\n')
-    console.log('Headers: ', request.headers, '\n\n')
-}
-
 app.get('/', (request, response) => {
-    printRequest(request)
     response.send('<h1>Hello World</h1>')
 })
 
 app.get('/info', (request, response) => {
-    printRequest(request)
     let content = ''
     content += `<p>Phonebook has info for ${ persons.length } people</p>`
     content += `<p>${ (new Date()).toString() }</p>`
@@ -51,12 +52,10 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-    printRequest(request)
     response.json(persons)
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    printRequest(request)
     const id = Number(request.params.id)
     const person = persons.find(person => person.id === id)
     if (person) {
@@ -67,8 +66,6 @@ app.get('/api/persons/:id', (request, response) => {
 })
 
 app.post('/api/persons', (request, response) => {
-    printRequest(request)
-
     if (!request.body) {
         return response.status(400).json({
             error: 'content missing'
@@ -100,11 +97,15 @@ app.post('/api/persons', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    printRequest(request)
     const id = Number(request.params.id)
     persons = persons.filter(person => person.id !== id)
     response.status(204).end()
 })
+
+const unknownEndpoint = (request, response, next) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
 
 const PORT = 3001
 app.listen(PORT, () => {
